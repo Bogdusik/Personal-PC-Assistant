@@ -1,6 +1,9 @@
 {
   "hotkey": "right shift",
+  "create_command_hotkey": "F4",
+  
   "mic_device": null,
+  "ollama_model": "gemma3:12b",
   "app_aliases": {
     "chrome": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
     "notepad": "C:\\Windows\\System32\\notepad.exe",
@@ -8,5 +11,59 @@
     "discord": "C:\\Users\\bogdy\\AppData\\Local\\Discord\\Update.exe",
     "steam": "C:\\Program Files (x86)\\Steam\\Steam.exe",
     "code": "C:\\Users\\bogdy\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
-  }
+  },
+  "custom_commands": [
+    {
+      "match_type": "equals",
+      "pattern": "открой ютуб",
+      "intent": "open_browser_search",
+      "args": {
+        "query": "youtube"
+      },
+      "speak": "Открываю поиск по YouTube."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "сделай скрин",
+      "intent": "screenshot",
+      "args": {},
+      "speak": "Скриншот готов."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "открой телеграм",
+      "intent": "open_app",
+      "args": {
+        "alias": "telegram"
+      },
+      "speak": "Открываю Телеграм."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "открой браузер",
+      "intent": "open_app",
+      "args": {
+        "alias": "chrome"
+      },
+      "speak": "Открываю браузер."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "Открой YouTube",
+      "intent": "open_website",
+      "args": {
+        "url": "https://www.youtube.com"
+      },
+      "speak": "Открываю YouTube."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "Открой проводник.",
+      "intent": "open_app",
+      "args": {
+        "alias": "explorer"
+      },
+      "speak": "Открыл проводник"
+    }
+  ]
 }
