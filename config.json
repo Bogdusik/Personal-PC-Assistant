@@ -1,0 +1,9 @@
+{
+  "hotkey": "right shift",
+  "mic_device": null,
+  "app_aliases": {
+    "chrome": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+    "notepad": "C:\\Windows\\System32\\notepad.exe",
+    "telegram": "C:\\Users\\Public\\Desktop\\Telegram.lnk"
+  }
+}

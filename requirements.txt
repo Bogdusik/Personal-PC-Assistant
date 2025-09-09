@@ -1,0 +1,9 @@
+sounddevice
+soundfile
+numpy
+keyboard
+faster-whisper
+jsonschema
+comtypes
+pycaw
+mss
