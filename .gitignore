@@ -1,0 +1,19 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environment
+.venv/
+
+# Logs & audio
+*.log
+assistant.log
+last_cmd.wav
+
+# VS Code
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
