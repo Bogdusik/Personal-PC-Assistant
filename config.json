@@ -4,6 +4,9 @@
   "app_aliases": {
     "chrome": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
     "notepad": "C:\\Windows\\System32\\notepad.exe",
-    "telegram": "C:\\Users\\Public\\Desktop\\Telegram.lnk"
+    "telegram": "C:\\Users\\Public\\Desktop\\Telegram.lnk",
+    "discord": "C:\\Users\\bogdy\\AppData\\Local\\Discord\\Update.exe",
+    "steam": "C:\\Program Files (x86)\\Steam\\Steam.exe",
+    "code": "C:\\Users\\bogdy\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
   }
 }
