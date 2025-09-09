@@ -62,3 +62,21 @@
 2025-09-09 12:13:08,856 [INFO] VAD filter removed 00:02.144 of audio
 2025-09-09 12:13:21,234 [INFO] Processing audio with duration 00:03.136
 2025-09-09 12:13:21,240 [INFO] VAD filter removed 00:00.992 of audio
+2025-09-09 12:20:15,915 [INFO] Processing audio with duration 00:03.200
+2025-09-09 12:20:15,972 [INFO] VAD filter removed 00:00.928 of audio
+2025-09-09 12:20:27,204 [INFO] Processing audio with duration 00:02.752
+2025-09-09 12:20:27,209 [INFO] VAD filter removed 00:00.352 of audio
+2025-09-09 12:20:35,775 [INFO] Processing audio with duration 00:02.816
+2025-09-09 12:20:35,780 [INFO] VAD filter removed 00:00.224 of audio
+2025-09-09 12:20:44,523 [INFO] Processing audio with duration 00:02.240
+2025-09-09 12:20:44,528 [INFO] VAD filter removed 00:00.000 of audio
+2025-09-09 12:20:55,813 [INFO] Processing audio with duration 00:02.880
+2025-09-09 12:20:55,819 [INFO] VAD filter removed 00:00.400 of audio
+2025-09-09 12:21:01,623 [INFO] Processing audio with duration 00:03.008
+2025-09-09 12:21:01,629 [INFO] VAD filter removed 00:00.608 of audio
+2025-09-09 12:21:09,681 [INFO] Processing audio with duration 00:03.200
+2025-09-09 12:21:09,688 [INFO] VAD filter removed 00:00.608 of audio
+2025-09-09 12:21:19,324 [INFO] Processing audio with duration 00:04.096
+2025-09-09 12:21:19,332 [INFO] VAD filter removed 00:00.800 of audio
+2025-09-09 12:21:34,045 [INFO] Processing audio with duration 00:03.136
+2025-09-09 12:21:34,051 [INFO] VAD filter removed 00:01.568 of audio
