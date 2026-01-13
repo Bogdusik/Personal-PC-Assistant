@@ -1,7 +1,5 @@
 {
   "hotkey": "right shift",
-  "create_command_hotkey": "F4",
-  
   "mic_device": null,
   "ollama_model": "gemma3:12b",
   "app_aliases": {
@@ -10,7 +8,16 @@
     "telegram": "C:\\Users\\Public\\Desktop\\Telegram.lnk",
     "discord": "C:\\Users\\bogdy\\AppData\\Local\\Discord\\Update.exe",
     "steam": "C:\\Program Files (x86)\\Steam\\Steam.exe",
-    "code": "C:\\Users\\bogdy\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+    "code": "C:\\Users\\bogdy\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+    "spotify": "C:\\Users\\bogdy\\AppData\\Roaming\\Spotify\\Spotify.exe",
+    "armoury": "C:\\Program Files\\ASUS\\Armoury Crate\\Armoury Crate.exe",
+    "explorer": "C:\\Windows\\explorer.exe",
+    "settings": "ms-settings:",
+    "cursor": "C:\\Users\\bogdy\\AppData\\Local\\Programs\\cursor\\Cursor.exe",
+    "calendar": "C:\\Program Files\\Microsoft Office\\root\\Office16\\outlook.exe",
+    "obs": "C:\\Program Files\\obs-studio\\bin\\64bit\\obs64.exe",
+    "obs studio": "C:\\Program Files\\obs-studio\\bin\\64bit\\obs64.exe",
+    "на стройке": "ms-settings:"
   },
   "custom_commands": [
     {
@@ -64,6 +71,141 @@
         "alias": "explorer"
       },
       "speak": "Открыл проводник"
+    },
+    {
+      "match_type": "equals",
+      "pattern": "открой спотифай",
+      "intent": "open_app",
+      "args": {
+        "alias": "spotify"
+      },
+      "speak": "Открываю Spotify."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "открой параметры",
+      "intent": "open_app",
+      "args": {
+        "alias": "settings"
+      },
+      "speak": "Открываю параметры Windows."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "сверни спотифай",
+      "intent": "minimize_app",
+      "args": {
+        "alias": "spotify"
+      },
+      "speak": "Сворачиваю Spotify."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "закрой спотифай",
+      "intent": "close_app",
+      "args": {
+        "alias": "spotify"
+      },
+      "speak": "Закрываю Spotify."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "закрой spotify",
+      "intent": "close_app",
+      "args": {
+        "alias": "spotify"
+      },
+      "speak": "Закрываю Spotify."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "заверши спотифай",
+      "intent": "close_app",
+      "args": {
+        "alias": "spotify"
+      },
+      "speak": "Закрываю Spotify."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "открой курсор",
+      "intent": "open_app",
+      "args": {
+        "alias": "cursor"
+      },
+      "speak": null
+    },
+    {
+      "match_type": "equals",
+      "pattern": "открой cursor",
+      "intent": "open_app",
+      "args": {
+        "alias": "cursor"
+      },
+      "speak": "Открываю Cursor."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "сверни курсор",
+      "intent": "minimize_app",
+      "args": {
+        "alias": "cursor"
+      },
+      "speak": "Сворачиваю Cursor."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "сверни cursor",
+      "intent": "minimize_app",
+      "args": {
+        "alias": "cursor"
+      },
+      "speak": "Сворачиваю Cursor."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "закрой курсор",
+      "intent": "close_app",
+      "args": {
+        "alias": "cursor"
+      },
+      "speak": "Закрываю Cursor."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "закрой cursor",
+      "intent": "close_app",
+      "args": {
+        "alias": "cursor"
+      },
+      "speak": "Закрываю Cursor."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "заверши курсор",
+      "intent": "close_app",
+      "args": {
+        "alias": "cursor"
+      },
+      "speak": "Закрываю Cursor."
+    },
+    {
+      "match_type": "equals",
+      "pattern": "Открой календарь",
+      "intent": "open_app",
+      "args": {
+        "alias": "calendar"
+      },
+      "speak": null
+    },
+    {
+      "match_type": "equals",
+      "pattern": "Открой обс студио",
+      "intent": "open_app",
+      "args": {
+        "alias": "obs studio"
+      },
+      "speak": null
     }
   ]
 }
