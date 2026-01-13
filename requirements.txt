@@ -3,8 +3,11 @@ soundfile
 numpy
 keyboard
 faster-whisper
-jsonschema
 comtypes
 pycaw
 mss
 requests
+pywin32
+psutil
+pymorphy2
+pyperclip

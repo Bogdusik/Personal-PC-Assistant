@@ -11,9 +11,31 @@ __pycache__/
 assistant.log
 last_cmd.wav
 
+# Screenshots
+screenshot_*.png
+
 # VS Code
 .vscode/
+.vscode/
+.idea/
 
 # OS
 .DS_Store
 Thumbs.db
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.venv/
+venv/
+ENV/
