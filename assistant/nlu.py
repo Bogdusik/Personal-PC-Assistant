@@ -195,8 +195,11 @@ def _normalize_app_name(name: str) -> str:
     if any(word in t for word in ["фото", "фотографии", "картинки", "изображения", "paint", "краска", "рисование", "редактор"]):
         return "фото редактор"
     
-    # Календарь
-    if any(word in t for word in ["календарь", "calendar", "дата", "события", "календарим", "календарик"]):
+    # Календарь (учитываем частые опечатки ASR)
+    if any(word in t for word in [
+        "календарь", "calendar", "дата", "события",
+        "календарим", "календарик", "колендарь", "колендаль"
+    ]):
         return "календарь"
     
     # Почта
@@ -360,7 +363,10 @@ def _rules_nlu(phrase: str) -> dict:
                     "speak": f"Ищу {app_name} с помощью ИИ..."
                 }, 0.9, orig)
 
-    m5 = re.search(r"\b(свернуть|минимизировать|убрать\s+в\s+трей|спрятать)\s+(.+)", _lemmatize_line(orig))
+    m5 = re.search(
+        r"\b(свернуть|минимизировать|убрать\s+в\s+трей|спрятать|скрой|сокрой)\s+(.+)",
+        _lemmatize_line(orig),
+    )
     if m5:
         app_name = m5.group(2).strip()
         alias = _normalize_app_name(app_name)
@@ -376,7 +382,14 @@ def _rules_nlu(phrase: str) -> dict:
     if m3:
         alias_raw = m3.group(2).strip()
         alias = _normalize_app_name(alias_raw)
-        return _wrap({"intent": "open_app", "args": {"alias": alias}, "speak": f"Открываю {alias_raw}."}, 0.9, orig)
+        # В ответе используем нормализованное имя, чтобы не повторять
+        # кривое распознавание типа "Откроекалендарь" или "колендаль"
+        speak_name = alias if alias else alias_raw
+        return _wrap(
+            {"intent": "open_app", "args": {"alias": alias}, "speak": f"Открываю {speak_name}."},
+            0.9,
+            orig,
+        )
 
     if re.fullmatch(r"[a-zA-Zа-яА-Я0-9\.\-\s_]+", orig) and len(orig) <= 30:
         if not re.search(r"\b(открой|закрой|сверни|открыть|закрыть|свернуть|запусти|включи)\b", orig, re.IGNORECASE):
