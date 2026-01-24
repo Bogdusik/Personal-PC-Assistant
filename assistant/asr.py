@@ -86,8 +86,9 @@ def transcribe(model, path: str) -> str:
             language="ru",
             vad_filter=True,
             vad_parameters=dict(min_silence_duration_ms=300),
-            beam_size=5,
-            best_of=5,
+            # Максимально быстрый режим: жадный декодер без бима
+            beam_size=1,
+            best_of=1,
             condition_on_previous_text=False
         )
         

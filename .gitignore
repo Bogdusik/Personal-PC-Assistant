@@ -39,3 +39,6 @@ build/
 .venv/
 venv/
 ENV/
+
+# Local config
+config.json

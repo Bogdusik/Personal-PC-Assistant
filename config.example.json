@@ -1,0 +1,23 @@
+{
+  "hotkey": "right shift",
+  "mic_device": null,
+  "ollama_model": "gemma3:12b",
+  "app_aliases": {
+    "chrome": "C:\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe",
+    "notepad": "C:\\\\Windows\\\\System32\\\\notepad.exe",
+    "telegram": "C:\\\\Users\\\\Public\\\\Desktop\\\\Telegram.lnk",
+    "discord": "C:\\\\Users\\\\YOUR_USER\\\\AppData\\\\Local\\\\Discord\\\\Update.exe",
+    "steam": "C:\\\\Program Files (x86)\\\\Steam\\\\Steam.exe",
+    "code": "C:\\\\Users\\\\YOUR_USER\\\\AppData\\\\Local\\\\Programs\\\\Microsoft VS Code\\\\Code.exe",
+    "spotify": "C:\\\\Users\\\\YOUR_USER\\\\AppData\\\\Roaming\\\\Spotify\\\\Spotify.exe",
+    "armoury": "C:\\\\Program Files\\\\ASUS\\\\Armoury Crate\\\\Armoury Crate.exe",
+    "explorer": "C:\\\\Windows\\\\explorer.exe",
+    "settings": "ms-settings:",
+    "cursor": "C:\\\\Users\\\\YOUR_USER\\\\AppData\\\\Local\\\\Programs\\\\cursor\\\\Cursor.exe",
+    "calendar": "C:\\\\Program Files\\\\Microsoft Office\\\\root\\\\Office16\\\\outlook.exe",
+    "obs": "C:\\\\Program Files\\\\obs-studio\\\\bin\\\\64bit\\\\obs64.exe",
+    "obs studio": "C:\\\\Program Files\\\\obs-studio\\\\bin\\\\64bit\\\\obs64.exe"
+  },
+  "custom_commands": []
+}
+

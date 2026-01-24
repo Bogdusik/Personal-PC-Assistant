@@ -1,26 +1,43 @@
-import warnings, os, sys, json, logging, time, subprocess, atexit
+import warnings
+import os
+import sys
+import json
+import logging
+import time
+import subprocess
+import atexit
+
 import requests
+
 try:
     import keyboard
 except ImportError:
     keyboard = None
 
 warnings.filterwarnings("ignore")
-os.environ['PYTHONWARNINGS'] = 'ignore'
-os.environ['PYTHONIOENCODING'] = 'utf-8'
+os.environ["PYTHONWARNINGS"] = "ignore"
+os.environ["PYTHONIOENCODING"] = "utf-8"
 
 if sys.platform == "win32":
     import codecs
+
+    # Гарантируем вывод в консоль в UTF-8 на Windows
     sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
     sys.stderr = codecs.getwriter("utf-8")(sys.stderr.detach())
 
 class WarningFilter:
+    """Фильтр для подавления шумных предупреждений от сторонних библиотек."""
+
     def __init__(self, original_stderr):
         self.original_stderr = original_stderr
+
     def write(self, message):
+        if not message:
+            return
         if "pkg_resources" in message or "DeprecationWarning" in message:
             return
         self.original_stderr.write(message)
+
     def flush(self):
         self.original_stderr.flush()
 
