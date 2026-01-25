@@ -32,7 +32,7 @@ python main_gui.py
 
 ## What's in my head after building this
 
-• Learned how speech recognition actually works in practice, not just from lectures — Faster Whisper is incredible  
-• Got comfortable with Windows API hell — PyCaw, win32gui, keyboard hooks, all the fun stuff  
+• Learned how speech recognition actually works in practice, not just from lectures - Faster Whisper is incredible  
+• Got comfortable with Windows API hell - PyCaw, win32gui, keyboard hooks, all the fun stuff  
 • What's next: connect it to smart home devices, maybe add gesture control  
 • Personal takeaway: my computer isn't just a machine anymore, it's like having a conversation. Yesterday I literally told it to open Spotify and it did. That's wild.
