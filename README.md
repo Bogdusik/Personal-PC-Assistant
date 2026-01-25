@@ -1,111 +1,111 @@
 # Personal PC Assistant
 
-Голосовой ассистент для управления Windows ПК с поддержкой AI.
+Voice-controlled assistant for Windows PC management with AI support.
 
-## Возможности
+## Features
 
-- 🎙️ Распознавание речи (Faster Whisper)
-- 🤖 AI-интеграция (Ollama) для поиска приложений и диалогов
-- 🚀 Управление приложениями (открыть/закрыть/свернуть)
-- 🔊 Управление системой (громкость, яркость, Wi-Fi, скриншоты)
-- 🎯 Пользовательские команды
-- 🖥️ Премиум GUI в стиле sci-fi/cyberpunk
+- 🎙️ Speech recognition (Faster Whisper)
+- 🤖 AI integration (Ollama) for app search and conversations
+- 🚀 Application management (open/close/minimize)
+- 🔊 System control (volume, brightness, Wi-Fi, screenshots)
+- 🎯 Custom commands
+- 🖥️ Premium sci-fi/cyberpunk GUI
 
-## Требования
+## Requirements
 
 - Python 3.8+
 - Windows 10/11
-- [Ollama](https://ollama.ai/) установлен
-- Микрофон
+- [Ollama](https://ollama.ai/) installed
+- Microphone
 
-## Установка
+## Installation
 
 ```bash
-# Клонировать репозиторий
+# Clone repository
 git clone https://github.com/Bogdusik/Personal-PC-Assistant.git
 cd Personal-PC-Assistant
 
-# Установить зависимости
+# Install dependencies
 pip install -r requirements.txt
 
-# Установить модель Ollama
+# Pull Ollama model
 ollama pull gemma3:12b
 ```
 
-## Настройка
+## Configuration
 
-1. Скопировать `config.example.json` в `config.json`
-2. Настроить пути к приложениям в `app_aliases`
-3. Настроить горячую клавишу (по умолчанию: `right shift`)
+1. Copy `config.example.json` to `config.json`
+2. Configure application paths in `app_aliases`
+3. Set hotkey (default: `right shift`)
 
-## Запуск
+## Running
 
-**⚠️ Важно:** Запускать от имени администратора для работы горячих клавиш!
+**⚠️ Important:** Run as Administrator for hotkey functionality!
 
-### GUI версия (рекомендуется)
+### GUI version (recommended)
 ```bash
 python main_gui.py
 ```
 
-### Консольная версия
+### Console version
 ```bash
 python main_fast.py
 ```
 
-## Использование
+## Usage
 
-1. Нажми и удерживай `Right Shift` (или настроенную горячую клавишу)
-2. Произнеси команду (например: "открой браузер", "сделай скриншот")
-3. Отпусти клавишу для обработки
+1. Press and hold `Right Shift` (or configured hotkey)
+2. Speak your command (e.g., "открой браузер", "сделай скриншот")
+3. Release the key to process
 
-### Примеры команд
+### Example Commands
 
-| Команда | Действие |
-|---------|----------|
-| `открой браузер` | Открыть Chrome |
-| `открой телеграм` | Открыть Telegram |
-| `сделай скриншот` | Сделать скриншот |
-| `установи громкость 50` | Установить громкость 50% |
-| `закрой спотифай` | Закрыть Spotify |
-| `статус` | Показать статус системы |
+| Command | Action |
+|---------|--------|
+| `открой браузер` | Open Chrome |
+| `открой телеграм` | Open Telegram |
+| `сделай скриншот` | Take screenshot |
+| `установи громкость 50` | Set volume to 50% |
+| `закрой спотифай` | Close Spotify |
+| `статус` | Show system status |
 
-## Структура проекта
+## Project Structure
 
 ```
 Personal-PC-Assistant/
-├── main_gui.py              # GUI версия (PyQt6)
-├── main_fast.py             # Консольная версия
-├── config.example.json       # Пример конфигурации
-├── requirements.txt          # Зависимости
+├── main_gui.py              # GUI version (PyQt6)
+├── main_fast.py             # Console version
+├── config.example.json       # Configuration template
+├── requirements.txt          # Dependencies
 │
 └── assistant/
-    ├── asr.py               # Распознавание речи
-    ├── nlu.py               # Понимание команд
-    ├── recorder.py          # Запись аудио
-    ├── runner.py            # Выполнение команд
+    ├── asr.py               # Speech recognition
+    ├── nlu.py               # Command understanding
+    ├── recorder.py          # Audio recording
+    ├── runner.py            # Command execution
     └── skills/
-        └── skills.py        # Основные функции
+        └── skills.py        # Core functionality
 ```
 
-## Технологии
+## Technologies
 
-- **Faster Whisper** - распознавание речи
-- **Ollama** - AI модели
-- **PyQt6** - GUI интерфейс
-- **PyCaw** - управление звуком Windows
-- **Keyboard** - обработка горячих клавиш
+- **Faster Whisper** - Speech recognition
+- **Ollama** - AI models
+- **PyQt6** - GUI interface
+- **PyCaw** - Windows audio control
+- **Keyboard** - Hotkey handling
 
-## Решение проблем
+## Troubleshooting
 
-**Горячие клавиши не работают**  
-→ Запустите от имени администратора
+**Hotkeys don't work**  
+→ Run as Administrator
 
-**Ollama не запускается**  
-→ Убедитесь, что Ollama установлен и добавлен в PATH
+**Ollama not starting**  
+→ Ensure Ollama is installed and added to PATH
 
-**Микрофон не работает**  
-→ Проверьте настройки Windows и укажите device ID в `config.json`
+**Microphone not working**  
+→ Check Windows settings and specify device ID in `config.json`
 
-## Лицензия
+## License
 
-Для личного использования и образовательных целей.
+For personal use and educational purposes.
