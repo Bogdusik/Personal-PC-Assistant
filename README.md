@@ -8,7 +8,10 @@ A voice assistant for Windows that actually listens and executes commands. Built
 
 ## Why this is cool
 
-Custom sci-fi/cyberpunk GUI with animated waveform that pulses from your voice in real-time, smooth fade-in animations, and glassmorphism effects. Works even if Ollama crashes — graceful fallback guides you through setup. Plus the whole interface "wakes up" when you launch it, and buttons have ripple effects on hover. Everything runs locally — Faster Whisper + Ollama, nothing goes to the cloud.
+• **Animation** — Custom sci-fi/cyberpunk GUI with animated waveform that pulses from your voice in real-time, smooth fade-in on launch, glassmorphism effects  
+• **Fallback** — Works even if Ollama crashes, graceful fallback guides you through setup  
+• **Local AI** — Everything runs locally (Faster Whisper + Ollama), nothing goes to the cloud  
+• **Ripple on buttons** — Interactive interface with ripple effects on hover, the whole UI "wakes up" when you launch it
 
 ## How to run
 
@@ -30,4 +33,4 @@ Custom sci-fi/cyberpunk GUI with animated waveform that pulses from your voice i
 
 ## Want to use it?
 
-Fork it, write to me, improve it. I won't be offended.
+Fork it, improve it. I won't be offended.
