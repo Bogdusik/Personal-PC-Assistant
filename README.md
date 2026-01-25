@@ -1,48 +1,33 @@
 # Personal PC Assistant
 
-A voice assistant for Windows that **actually listens** and executes commands in natural language.  
-Say "open browser", "take a screenshot", "play Spotify" or "talk to me" — and it happens instantly, without mouse clicks or menus.  
-Built it because I got tired of digging through settings and wanted my computer to feel like a living conversation partner.
+A voice assistant for Windows that actually listens and executes commands. Built it because I got tired of clicking through menus and wanted my computer to feel like a conversation partner.
 
 ## How it looks
 
 ![Control Panel Screenshot](assets/gui-screenshot.png)
 
-*(Short video demo coming soon — voice → reaction → execution)*
+## Why this is cool
 
-## Why this isn't just "another assistant"
+Custom sci-fi/cyberpunk GUI with animated waveform that pulses from your voice in real-time, smooth fade-in animations, and glassmorphism effects. Works even if Ollama crashes — graceful fallback guides you through setup. Plus the whole interface "wakes up" when you launch it, and buttons have ripple effects on hover. Everything runs locally — Faster Whisper + Ollama, nothing goes to the cloud.
 
-- Fully custom sci-fi/cyberpunk GUI built from scratch: glassmorphism, neon accents, animated waveform microphone monitor, smooth fade-in on launch  
-- Works even if Ollama crashes — graceful fallback with helpful prompts "let's start the model"  
-- Reactive interface: waveform pulses from voice in real-time, buttons with ripple effects, hover-glow  
-- Hotkey support (default Right Shift) — hold to speak, release to process  
-- Full system control: volume, brightness, Wi-Fi, launch apps by aliases, screenshots, media control  
-- Local AI: Faster Whisper + Ollama (gemma3:12b) — nothing goes to the cloud  
+## How to run
 
-## Quick start (even if you're a beginner)
+1. `git clone https://github.com/Bogdusik/Personal-PC-Assistant.git`
+2. `cd Personal-PC-Assistant`
+3. `python -m venv venv` (optional, but recommended)
+4. `venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Linux/Mac)
+5. `pip install -r requirements.txt`
+6. `ollama pull gemma3:12b` (install Ollama first from ollama.ai)
+7. `python main_gui.py` (run as Administrator for hotkey support)
 
-```bash
-git clone https://github.com/Bogdusik/Personal-PC-Assistant.git
-cd Personal-PC-Assistant
-# (optional) create virtual environment
-python -m venv venv
-# Windows:
-venv\Scripts\activate
-# Linux/Mac:
-source venv/bin/activate
+**Important:** Works only on Windows 10/11. Requires microphone access. Run as Administrator for hotkey functionality (default: Right Shift — hold to speak, release to process).
 
-pip install -r requirements.txt
-# Install Ollama and pull model (if not already)
-ollama pull gemma3:12b
-# Run (must be Administrator for hotkey!)
-python main_gui.py
-```
+## What I learned from this
 
-**Important:** Run as Administrator for hotkey functionality. Works only on Windows 10/11.
+• Mastered speech recognition in practice — Faster Whisper is incredible  
+• Got comfortable with PyQt6 and Windows API (PyCaw, win32gui, keyboard hooks)  
+• Finally built something I always wanted — talking to my computer feels natural now
 
-## What's in my head after building this
+## Want to use it?
 
-• Learned how speech recognition actually works in practice, not just from lectures - Faster Whisper is incredible  
-• Got comfortable with Windows API hell - PyCaw, win32gui, keyboard hooks, all the fun stuff  
-• What's next: connect it to smart home devices, maybe add gesture control  
-• Personal takeaway: my computer isn't just a machine anymore, it's like having a conversation. Yesterday I literally told it to open Spotify and it did. That's wild.
+Fork it, write to me, improve it. I won't be offended.
