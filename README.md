@@ -4,7 +4,7 @@ This app lets you talk to your computer and it actually listens. I built it beca
 
 ## How it looks
 
-![GUI Screenshot](https://via.placeholder.com/800x500/000000/FF6600?text=Premium+Sci-Fi+GUI+with+Waveform+Monitor)
+![GUI Screenshot](assets/gui-screenshot.png)
 
 *(Video demo coming soon)*
 
