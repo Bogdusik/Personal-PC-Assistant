@@ -8,10 +8,10 @@ A voice assistant for Windows that actually listens and executes commands. Built
 
 ## Why this is cool
 
-• **Animation** — Custom sci-fi/cyberpunk GUI with animated waveform that pulses from your voice in real-time, smooth fade-in on launch, glassmorphism effects  
-• **Fallback** — Works even if Ollama crashes, graceful fallback guides you through setup  
-• **Local AI** — Everything runs locally (Faster Whisper + Ollama), nothing goes to the cloud  
-• **Ripple on buttons** — Interactive interface with ripple effects on hover, the whole UI "wakes up" when you launch it
+• **Animation** - Custom sci-fi/cyberpunk GUI with animated waveform that pulses from your voice in real-time, smooth fade-in on launch, glassmorphism effects  
+• **Fallback** - Works even if Ollama crashes, graceful fallback guides you through setup  
+• **Local AI** - Everything runs locally (Faster Whisper + Ollama), nothing goes to the cloud  
+• **Ripple on buttons** - Interactive interface with ripple effects on hover, the whole UI "wakes up" when you launch it
 
 ## How to run
 
@@ -23,13 +23,13 @@ A voice assistant for Windows that actually listens and executes commands. Built
 6. `ollama pull gemma3:12b` (install Ollama first from ollama.ai)
 7. `python main_gui.py` (run as Administrator for hotkey support)
 
-**Important:** Works only on Windows 10/11. Requires microphone access. Run as Administrator for hotkey functionality (default: Right Shift — hold to speak, release to process).
+**Important:** Works only on Windows 10/11. Requires microphone access. Run as Administrator for hotkey functionality (default: Right Shift - hold to speak, release to process).
 
 ## What I learned from this
 
-• Mastered speech recognition in practice — Faster Whisper is incredible  
+• Mastered speech recognition in practice - Faster Whisper is incredible  
 • Got comfortable with PyQt6 and Windows API (PyCaw, win32gui, keyboard hooks)  
-• Finally built something I always wanted — talking to my computer feels natural now
+• Finally built something I always wanted - talking to my computer feels natural now
 
 ## Want to use it?
 
