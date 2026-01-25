@@ -11,3 +11,4 @@ pywin32==306
 psutil==5.9.8
 pymorphy2==0.9.1
 pyperclip==1.8.2
+PyQt6==6.8.0
