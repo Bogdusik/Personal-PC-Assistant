@@ -1,15 +1,18 @@
 from __future__ import annotations
 import re, json, time, os, requests
+from pathlib import Path
 from typing import Any, Dict, Optional, List
 
 USE_RULES_FIRST = True
+
+_CONFIG_PATH = Path(__file__).resolve().parent.parent / "config.json"
 
 def _get_ollama_model() -> str:
     env = os.environ.get("OLLAMA_MODEL")
     if env:
         return env
     try:
-        with open("config.json", "r", encoding="utf-8") as f:
+        with _CONFIG_PATH.open("r", encoding="utf-8") as f:
             cfg = json.load(f)
         if isinstance(cfg, dict):
             m = cfg.get("ollama_model")
@@ -21,7 +24,6 @@ def _get_ollama_model() -> str:
 
 OLLAMA_ENABLED = True
 OLLAMA_URL = "http://localhost:11434/api/generate"
-OLLAMA_MODEL = _get_ollama_model()
 OLLAMA_TIMEOUT = 35
 OLLAMA_RETRIES = 2
 OLLAMA_RETRY_BACKOFF = 0.8
@@ -71,9 +73,9 @@ _CFG_CACHE = {}
 def load_config_cached() -> dict:
     global _CFG_MTIME, _CFG_CACHE
     try:
-        st = os.stat("config.json")
+        st = _CONFIG_PATH.stat()
         if st.st_mtime != _CFG_MTIME:
-            with open("config.json", "r", encoding="utf-8") as f:
+            with _CONFIG_PATH.open("r", encoding="utf-8") as f:
                 _CFG_CACHE = json.load(f)
             _CFG_MTIME = st.st_mtime
     except Exception:
@@ -460,7 +462,7 @@ def _rules_nlu(phrase: str) -> dict:
 
 def _ollama_generate(user_text: str) -> dict | None:
     payload = {
-        "model": OLLAMA_MODEL,
+        "model": _get_ollama_model(),
         "prompt": f"{PROMPT_SYSTEM}\nФраза пользователя: {user_text}\nJSON:",
         "stream": True,
         "temperature": 0.0,

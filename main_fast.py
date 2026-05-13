@@ -1,4 +1,5 @@
 import warnings
+import gc
 import os
 import sys
 import json
@@ -6,6 +7,7 @@ import logging
 import time
 import subprocess
 import atexit
+from pathlib import Path
 
 import requests
 
@@ -49,9 +51,10 @@ from assistant.nlu import nlu_rules
 from assistant.runner import run_command
 from assistant.skills import APP_ALIASES
 
-AUDIO_PATH = "last_cmd.wav"
-LOG_FILE = "assistant.log"
-CONFIG_PATH = "config.json"
+_ROOT = Path(__file__).resolve().parent
+AUDIO_PATH = str(_ROOT / "last_cmd.wav")
+LOG_FILE = str(_ROOT / "assistant.log")
+CONFIG_PATH = str(_ROOT / "config.json")
 
 def setup_logging():
     for handler in logging.root.handlers[:]:
@@ -99,7 +102,6 @@ def cleanup_on_exit():
         except Exception as e:
             print(f"[WARNING] Ошибка очистки ASR: {e}")
         
-        import gc
         gc.collect()
         print("[OK] Память очищена.")
         print("[INFO] До свидания!")
@@ -362,7 +364,7 @@ def chat_with_assistant(text: str, max_retries: int = 3):
                 time.sleep(1)
                 continue
             return "Ollama недоступен. Попробуйте позже."
-        except:
+        except Exception:
             if attempt < max_retries - 1:
                 time.sleep(1)
                 continue
@@ -387,7 +389,7 @@ def chat_with_assistant(text: str, max_retries: int = 3):
                 time.sleep(2)
                 continue
             return "Ошибка обработки запроса"
-        except:
+        except Exception:
             if attempt < max_retries - 1:
                 time.sleep(2)
                 continue
@@ -402,7 +404,7 @@ def start_ollama():
             try:
                 if requests.get("http://localhost:11434/api/tags", timeout=2).status_code == 200:
                     return True
-            except:
+            except Exception:
                 pass
             time.sleep(1)
             if i % 3 == 0:
@@ -605,7 +607,6 @@ def main():
             cycle_count += 1
             if cycle_count >= MEMORY_CLEANUP_INTERVAL:
                 cycle_count = 0
-                import gc
                 gc.collect()
                 logging.debug("Выполнена периодическая очистка памяти")
             
