@@ -1,10 +1,14 @@
 from __future__ import annotations
-import os, glob, shutil, difflib, urllib.parse, webbrowser, subprocess, datetime, logging, time
+import json, os, glob, shutil, difflib, urllib.parse, webbrowser, subprocess, datetime, logging, time
+from pathlib import Path
 from typing import Tuple, List, Optional, Dict, Any
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 import mss
+import psutil
+
+_CONFIG_PATH = Path(__file__).resolve().parents[2] / "config.json"
 
 APP_ALIASES: dict[str, str] = {}
 _LAUNCH_LOCK = {}
@@ -20,7 +24,6 @@ def _cleanup_old_locks():
 
 def _is_app_running(alias: str) -> bool:
     try:
-        import psutil
         process_names = {
             "powershell": ["powershell.exe", "pwsh.exe"],
             "cmd": ["cmd.exe"], "chrome": ["chrome.exe"], "telegram": ["telegram.exe"],
@@ -37,7 +40,7 @@ def _is_app_running(alias: str) -> bool:
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
         return False
-    except:
+    except Exception:
         return False
 
 def _normalize_path(p: str) -> str:
@@ -66,7 +69,7 @@ def _find_app_path(app_name: str) -> Optional[str]:
         cached_result, timestamp = _APP_CACHE[cache_key]
         if time.time() - timestamp < _CACHE_TIMEOUT:
             return cached_result
-    
+
     translations = {
         "календарь": "calendar", "калькулятор": "calculator", "блокнот": "notepad",
         "проводник": "explorer", "файлы": "explorer", "музыка": "music",
@@ -75,30 +78,29 @@ def _find_app_path(app_name: str) -> Optional[str]:
         "spotify": "spotify", "telegram": "telegram", "chrome": "chrome", "code": "code", "cursor": "cursor"
     }
     translated = translations.get(app_name.lower(), app_name.lower())
-    
+
+    username = os.getenv('USERNAME', '')
     search_paths = [
-        r"C:\Windows\System32\{}.exe".format(translated),
-        r"C:\Program Files\{}\{}.exe".format(translated.title(), translated.title()),
-        r"C:\Program Files (x86)\{}\{}.exe".format(translated.title(), translated.title()),
+        rf"C:\Windows\System32\{translated}.exe",
+        rf"C:\Program Files\{translated.title()}\{translated.title()}.exe",
+        rf"C:\Program Files (x86)\{translated.title()}\{translated.title()}.exe",
     ]
-    
+
     special_paths = {
         "calendar": [r"C:\Program Files\Microsoft Office\root\Office16\outlook.exe"],
         "obs64": [r"C:\Program Files\obs-studio\bin\64bit\obs64.exe"],
-        "discord": [r"C:\Users\{}\AppData\Local\Discord\Update.exe".format(os.getenv('USERNAME', ''))],
-        "spotify": [r"C:\Users\{}\AppData\Roaming\Spotify\Spotify.exe".format(os.getenv('USERNAME', ''))],
-        "telegram": [r"C:\Users\{}\AppData\Roaming\Telegram Desktop\Telegram.exe".format(os.getenv('USERNAME', ''))],
+        "discord": [rf"C:\Users\{username}\AppData\Local\Discord\Update.exe"],
+        "spotify": [rf"C:\Users\{username}\AppData\Roaming\Spotify\Spotify.exe"],
+        "telegram": [rf"C:\Users\{username}\AppData\Roaming\Telegram Desktop\Telegram.exe"],
         "chrome": [r"C:\Program Files\Google\Chrome\Application\chrome.exe"],
-        "code": [r"C:\Users\{}\AppData\Local\Programs\Microsoft VS Code\Code.exe".format(os.getenv('USERNAME', ''))],
-        "cursor": [r"C:\Users\{}\AppData\Local\Programs\cursor\Cursor.exe".format(os.getenv('USERNAME', ''))]
+        "code": [rf"C:\Users\{username}\AppData\Local\Programs\Microsoft VS Code\Code.exe"],
+        "cursor": [rf"C:\Users\{username}\AppData\Local\Programs\cursor\Cursor.exe"]
     }
-    
+
     if translated in special_paths:
         search_paths.extend(special_paths[translated])
-    
+
     for path in search_paths:
-        if "{}" in path:
-            path = path.format(os.getenv('USERNAME', ''))
         if "*" in path:
             matches = glob.glob(path)
             if matches:
@@ -107,7 +109,7 @@ def _find_app_path(app_name: str) -> Optional[str]:
         elif _exists(path):
             _APP_CACHE[cache_key] = (path, time.time())
             return path
-    
+
     try:
         result = subprocess.run(["where", translated], capture_output=True, text=True, timeout=5)
         if result.returncode == 0 and result.stdout.strip():
@@ -115,9 +117,9 @@ def _find_app_path(app_name: str) -> Optional[str]:
             if _exists(found):
                 _APP_CACHE[cache_key] = (found, time.time())
                 return found
-    except:
+    except Exception:
         pass
-    
+
     try:
         import winreg
         for hkey, subkey in [(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths"),
@@ -132,11 +134,11 @@ def _find_app_path(app_name: str) -> Optional[str]:
                                 if _exists(app_path):
                                     _APP_CACHE[cache_key] = (app_path, time.time())
                                     return app_path
-            except:
+            except Exception:
                 continue
-    except:
+    except Exception:
         pass
-    
+
     _APP_CACHE[cache_key] = (None, time.time())
     return None
 
@@ -144,7 +146,7 @@ def _resolve_app_path(alias: str) -> Tuple[Optional[str], List[str]]:
     a = (alias or "").lower().strip()
     if not a:
         return None, []
-    
+
     path_cfg = APP_ALIASES.get(a)
     if path_cfg:
         if path_cfg.startswith(("ms-settings:", "http:", "https:")):
@@ -154,7 +156,7 @@ def _resolve_app_path(alias: str) -> Tuple[Optional[str], List[str]]:
             if a == "discord" and os.path.basename(path_cfg).lower() == "update.exe":
                 return path_cfg, ["--processStart", "Discord.exe"]
             return path_cfg, []
-    
+
     known = {
         "notepad": r"C:\Windows\System32\notepad.exe", "calc": r"C:\Windows\System32\calc.exe",
         "cmd": r"C:\Windows\System32\cmd.exe", "powershell": r"C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe",
@@ -168,7 +170,7 @@ def _resolve_app_path(alias: str) -> Tuple[Optional[str], List[str]]:
         "telegram": r"%APPDATA%\Telegram Desktop\Telegram.exe",
         "spotify": r"%APPDATA%\Spotify\Spotify.exe", "steam": r"C:\Program Files (x86)\Steam\Steam.exe"
     }
-    
+
     if a in known:
         path = known[a]
         if path.startswith("ms-settings:"):
@@ -180,11 +182,11 @@ def _resolve_app_path(alias: str) -> Tuple[Optional[str], List[str]]:
             matches = glob.glob(normalized)
             if matches and _exists(matches[0]):
                 return matches[0], []
-    
+
     found_path = _find_app_path(a)
     if found_path and _exists(found_path):
         return found_path, []
-    
+
     if APP_ALIASES and a not in APP_ALIASES:
         guess = _best_fuzzy(a, list(APP_ALIASES.keys()), cutoff=0.8)
         if guess:
@@ -194,26 +196,24 @@ def _resolve_app_path(alias: str) -> Tuple[Optional[str], List[str]]:
             path_guess = _normalize_path(path_guess)
             if _exists(path_guess):
                 return path_guess, []
-    
+
     found = shutil.which(a) or shutil.which(f"{a}.exe")
     if found and _exists(found):
         return found, []
-    
+
     return None, []
 
 def _auto_add_app_to_config(alias: str, path: str) -> None:
     try:
-        import json
-        config_path = "config.json"
-        if os.path.exists(config_path):
-            with open(config_path, "r", encoding="utf-8") as f:
+        if _CONFIG_PATH.exists():
+            with _CONFIG_PATH.open("r", encoding="utf-8") as f:
                 config = json.load(f)
         else:
             config = {}
         if "app_aliases" not in config:
             config["app_aliases"] = {}
         config["app_aliases"][alias] = path
-        with open(config_path, "w", encoding="utf-8") as f:
+        with _CONFIG_PATH.open("w", encoding="utf-8") as f:
             json.dump(config, f, ensure_ascii=False, indent=2)
         APP_ALIASES[alias] = path
     except Exception as e:
@@ -227,33 +227,33 @@ def open_app(alias: str) -> None:
             print(f"⏳ Приложение {alias} уже запускается, подождите...")
             return
     _LAUNCH_LOCK[alias] = current_time
-    
+
     path, extra_args = _resolve_app_path(alias)
     if not path:
         print(f"Не знаю приложение: {alias}")
         _LAUNCH_LOCK.pop(alias, None)
         return
-    
+
     if alias not in APP_ALIASES and path:
         _auto_add_app_to_config(alias, path)
-    
+
     try:
         if path.startswith("ms-settings:"):
             subprocess.Popen(["start", path], shell=True)
             return
-        
+
         if _is_app_running(alias):
             print(f"✅ {alias} уже запущен")
             return
-        
+
         if alias.lower() in ["powershell", "пауршелл"]:
             subprocess.Popen([path], creationflags=subprocess.CREATE_NEW_CONSOLE)
             return
-        
+
         if not extra_args and (path.lower().endswith(".lnk") or path.lower().endswith(".exe")):
             os.startfile(path)
             return
-        
+
         subprocess.Popen([path, *extra_args])
     except Exception as e:
         print(f"Не получилось открыть {alias}: {e}")
@@ -298,10 +298,10 @@ def minimize_app(alias: str) -> None:
                 if window_title:
                     windows.append((hwnd, window_title))
             return True
-        
+
         windows = []
         win32gui.EnumWindows(enum_windows_callback, windows)
-        
+
         app_keywords = {
             "spotify": ["spotify", "музыка", "спотифай"], "chrome": ["chrome", "google chrome", "хром"],
             "telegram": ["telegram", "телеграм"], "discord": ["discord"], "steam": ["steam"],
@@ -309,11 +309,11 @@ def minimize_app(alias: str) -> None:
             "notepad": ["notepad", "блокнот"], "calc": ["calculator"], "explorer": ["explorer", "проводник"],
             "armoury": ["armoury crate", "armoury"], "settings": ["settings", "параметры"]
         }
-        
+
         keywords = app_keywords.get(alias.lower(), [alias])
-        found_windows = [(hwnd, title) for hwnd, title in windows 
+        found_windows = [(hwnd, title) for hwnd, title in windows
                          if any(kw.lower() in title.lower() for kw in keywords)]
-        
+
         if found_windows:
             for hwnd, _ in found_windows:
                 win32gui.ShowWindow(hwnd, win32con.SW_MINIMIZE)
@@ -325,7 +325,6 @@ def minimize_app(alias: str) -> None:
 
 def close_app(alias: str) -> None:
     try:
-        import psutil
         app_processes = {
             "spotify": ["spotify.exe"], "chrome": ["chrome.exe"], "telegram": ["telegram.exe"],
             "discord": ["discord.exe"], "steam": ["steam.exe"], "code": ["code.exe"],
@@ -348,52 +347,7 @@ def close_app(alias: str) -> None:
     except Exception as e:
         print(f"Не удалось закрыть {alias}: {e}")
 
-def _get_user_confirmation(action: str, timeout: int = 30) -> bool:
-    print(f"\n⚠️  ВНИМАНИЕ: Вы собираетесь {action}")
-    print(f"⏰ У вас есть {timeout} секунд для подтверждения")
-    print("✅ Нажмите 'Y' или 'Enter' для подтверждения")
-    print("❌ Нажмите 'N' или 'Escape' для отмены")
-    
-    confirmed = False
-    cancelled = False
-    
-    import assistant.skills.skills as skills_module
-    skills_module._pending_confirmation = {'confirmed': False, 'cancelled': False}
-    
-    try:
-        import keyboard
-        def on_key_press(event):
-            nonlocal confirmed, cancelled
-            if event.name in ['y', 'enter']:
-                confirmed = True
-            elif event.name in ['n', 'escape']:
-                cancelled = True
-        keyboard.on_press(on_key_press)
-        
-        for i in range(timeout):
-            if confirmed:
-                return True
-            elif cancelled:
-                return False
-            if hasattr(skills_module, '_pending_confirmation'):
-                if skills_module._pending_confirmation['confirmed']:
-                    return True
-                elif skills_module._pending_confirmation['cancelled']:
-                    return False
-            time.sleep(1)
-        return False
-    finally:
-        try:
-            keyboard.unhook_all()
-        except:
-            pass
-        if hasattr(skills_module, '_pending_confirmation'):
-            del skills_module._pending_confirmation
-
 def system_shutdown() -> None:
-    if not _get_user_confirmation("выключить компьютер", 30):
-        print("[SYSTEM] Выключение отменено")
-        return
     try:
         subprocess.run(["shutdown", "/s", "/t", "10"], check=True)
         print("[SYSTEM] Система будет выключена через 10 секунд")
@@ -401,9 +355,6 @@ def system_shutdown() -> None:
         print(f"Ошибка выключения: {e}")
 
 def system_restart() -> None:
-    if not _get_user_confirmation("перезагрузить компьютер", 30):
-        print("[SYSTEM] Перезагрузка отменена")
-        return
     try:
         subprocess.run(["shutdown", "/r", "/t", "10"], check=True)
         print("[SYSTEM] Система будет перезагружена через 10 секунд")
@@ -411,9 +362,6 @@ def system_restart() -> None:
         print(f"Ошибка перезагрузки: {e}")
 
 def system_sleep() -> None:
-    if not _get_user_confirmation("перевести компьютер в режим сна", 20):
-        print("[SYSTEM] Переход в сон отменен")
-        return
     try:
         subprocess.run(["rundll32.exe", "powrprof.dll,SetSuspendState", "0,1,0"], check=True)
         print("[SYSTEM] Система переходит в режим сна")
@@ -421,9 +369,6 @@ def system_sleep() -> None:
         print(f"Ошибка перехода в сон: {e}")
 
 def system_lock() -> None:
-    if not _get_user_confirmation("заблокировать компьютер", 15):
-        print("[SYSTEM] Блокировка отменена")
-        return
     try:
         subprocess.run(["rundll32.exe", "user32.dll,LockWorkStation"], check=True)
         print("[SYSTEM] Система заблокирована")
@@ -458,7 +403,7 @@ def clipboard_copy(text: str) -> None:
     except Exception as e:
         print(f"Ошибка копирования: {e}")
 
-def clipboard_paste() -> None:
+def clipboard_paste() -> str:
     try:
         import pyperclip
         text = pyperclip.paste()
@@ -469,14 +414,10 @@ def clipboard_paste() -> None:
         return ""
 
 def confirm_action() -> None:
-    import assistant.skills.skills as skills_module
-    if hasattr(skills_module, '_pending_confirmation'):
-        skills_module._pending_confirmation['confirmed'] = True
+    pass
 
 def cancel_action() -> None:
-    import assistant.skills.skills as skills_module
-    if hasattr(skills_module, '_pending_confirmation'):
-        skills_module._pending_confirmation['cancelled'] = True
+    pass
 
 def _smart_search_with_context(app_name: str, user_context: str = "") -> Optional[str]:
     """Умный поиск с учетом контекста"""
@@ -485,7 +426,7 @@ def _smart_search_with_context(app_name: str, user_context: str = "") -> Optiona
         "видео": ["vlc"], "браузер": ["chrome"], "текст": ["notepad", "code"],
         "календарь": ["calendar"], "почта": ["mail"]
     }
-    
+
     for context, aliases in context_mappings.items():
         if context in app_name.lower() or context in user_context.lower():
             for alias in aliases:
@@ -500,7 +441,7 @@ def _smart_search_with_context(app_name: str, user_context: str = "") -> Optiona
                         matches = glob.glob(normalized)
                         if matches and _exists(matches[0]):
                             return matches[0]
-    
+
     return _find_app_path(app_name)
 
 SKILLS = {

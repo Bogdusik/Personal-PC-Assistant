@@ -1,4 +1,4 @@
-import time, re
+import time, re, logging
 from .skills import SKILLS
 
 _PENDING = None
@@ -43,7 +43,6 @@ def _pretty_cmd(cmd: dict) -> str:
     return intent or "команда"
 
 def _exec_skill(intent: str, args: dict, speak: str | None):
-    import logging
     fn = SKILLS.get(intent)
     if not fn:
         print("Неизвестная команда:", intent)
@@ -66,7 +65,6 @@ def _exec_skill(intent: str, args: dict, speak: str | None):
         logging.info(f"Озвучиваю результат: {speak}")
 
 def run_command(cmd: dict):
-    import logging
     global _PENDING, _LAST_COMMAND
 
     if not isinstance(cmd, dict) or "intent" not in cmd:
@@ -77,55 +75,63 @@ def run_command(cmd: dict):
     args = cmd.get("args", {})
     speak = cmd.get("speak")
     conf = float(cmd.get("confidence", 1.0))
-    
+
     logging.info(f"Получена команда: {intent}, уверенность: {conf:.2f}")
-    
+
     current_time = time.time()
     command_key = f"{intent}:{str(args)}"
-    
+
     if _LAST_COMMAND:
         last_time, last_key = _LAST_COMMAND
-        if (command_key == last_key and 
+        if (command_key == last_key and
             current_time - last_time < _COMMAND_COOLDOWN):
             print(f"[WAIT] Команда уже выполняется, подождите...")
             return
-    
+
     _LAST_COMMAND = (current_time, command_key)
 
     if _PENDING and (time.time() - _PENDING.get("ts", 0) > CONFIRM_TIMEOUT_SEC):
         _PENDING = None
 
     if _PENDING:
-        if intent == "smalltalk":
-            user_reply = (args.get("text") or "").strip()
-            if _is_yes(user_reply):
+        if intent in ("confirm_action", "cancel_action", "smalltalk"):
+            if intent == "confirm_action":
+                user_confirmed = True
+            elif intent == "cancel_action":
+                user_confirmed = False
+            else:
+                user_reply = (args.get("text") or "").strip()
+                if _is_yes(user_reply):
+                    user_confirmed = True
+                elif _is_no(user_reply):
+                    user_confirmed = False
+                else:
+                    print("Не понял, отменяю.")
+                    _PENDING = None
+                    return
+
+            if user_confirmed:
                 real = _PENDING
                 _PENDING = None
                 _exec_skill(real["intent"], real["args"], real.get("speak"))
-                return
-            elif _is_no(user_reply):
+            else:
                 print("Отменено.")
                 _PENDING = None
-                return
-            else:
-                print("Не понял, отменяю.")
-                _PENDING = None
-                return
+            return
         else:
             _PENDING = None
 
-    if intent == "smalltalk":
+    if intent in ("smalltalk", "confirm_action", "cancel_action"):
         if speak:
             print(speak)
         return
 
-    # Всегда требуем подтверждения для критических команд
     if intent in ["system_shutdown", "system_restart"]:
         _PENDING = {"intent": intent, "args": args, "speak": speak, "ts": time.time()}
         print(f"⚠️  КРИТИЧЕСКАЯ КОМАНДА: {_pretty_cmd(cmd)}")
         print("Подтвердите выполнение: (да/нет)")
         return
-    
+
     if conf < CONFIRM_THRESHOLD and intent in ["files.delete"]:
         _PENDING = {"intent": intent, "args": args, "speak": speak, "ts": time.time()}
         print(f"Подтвердить: {_pretty_cmd(cmd)}? (да/нет)")

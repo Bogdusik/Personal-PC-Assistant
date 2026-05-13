@@ -2,9 +2,12 @@
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 
 # Virtual environment
 .venv/
+venv/
+ENV/
 
 # Logs & audio
 *.log
@@ -14,8 +17,7 @@ last_cmd.wav
 # Screenshots
 screenshot_*.png
 
-# VS Code
-.vscode/
+# VS Code / IDE
 .vscode/
 .idea/
 
@@ -23,11 +25,7 @@ screenshot_*.png
 .DS_Store
 Thumbs.db
 
-# Python
-*.pyc
-*.pyo
-*.pyd
-__pycache__/
+# Build artifacts
 *.so
 *.egg
 *.egg-info/
@@ -36,9 +34,6 @@ build/
 
 # Environment
 .env
-.venv/
-venv/
-ENV/
 
 # Local config
 config.json
