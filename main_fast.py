@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import atexit
 import gc
 import json
@@ -23,8 +24,8 @@ os.environ["PYTHONIOENCODING"] = "utf-8"
 
 if sys.platform == "win32":
     import codecs
-    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
-    sys.stderr = codecs.getwriter("utf-8")(sys.stderr.detach())
+    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())  # type: ignore[union-attr]
+    sys.stderr = codecs.getwriter("utf-8")(sys.stderr.detach())  # type: ignore[union-attr]
 
 
 class _WarningFilter:
@@ -42,14 +43,15 @@ class _WarningFilter:
 
 sys.stderr = _WarningFilter(sys.stderr)
 
-from assistant.core.state import AssistantState
-from assistant.core.exceptions import AudioError, ConfigError
-from assistant.recorder import record_push_to_talk
-from assistant.asr import init_asr, transcribe, cleanup_asr
-from assistant.nlu import nlu_rules
-from assistant.runner import run_command
-from assistant.skills import APP_ALIASES
+from assistant.asr import cleanup_asr, init_asr, transcribe  # noqa: E402
+from assistant.core.exceptions import AudioError  # noqa: E402
+from assistant.core.state import AssistantState  # noqa: E402
+from assistant.nlu import nlu_rules  # noqa: E402
+from assistant.recorder import record_push_to_talk  # noqa: E402
+from assistant.runner import run_command  # noqa: E402
+from assistant.skills import APP_ALIASES  # noqa: E402
 
+_cleanup_called = False
 _ROOT = Path(__file__).resolve().parent
 AUDIO_PATH = str(_ROOT / "last_cmd.wav")
 LOG_FILE = str(_ROOT / "assistant.log")
@@ -108,9 +110,10 @@ def load_config(state: AssistantState) -> None:
 
 
 def cleanup_on_exit(state: AssistantState) -> None:
-    if getattr(cleanup_on_exit, "_called", False):
+    global _cleanup_called
+    if _cleanup_called:
         return
-    cleanup_on_exit._called = True
+    _cleanup_called = True
     print("\n" + "=" * 60)
     print("[INFO] Завершаю Ollama...")
     try:
@@ -354,7 +357,7 @@ def main() -> None:
 
     print("\n" + "=" * 60, flush=True)
     print(f"🎯 {state.hotkey.upper()} — голосовые команды", flush=True)
-    print(f"📚 Ctrl+4 — обучить команду", flush=True)
+    print("📚 Ctrl+4 — обучить команду", flush=True)
     print("❌ Ctrl+C — выход", flush=True)
     print("=" * 60, flush=True)
 
@@ -427,7 +430,10 @@ def main() -> None:
                     app_name = args.get("app_name", "")
                     context = args.get("context", "")
                     if app_name:
-                        from assistant.skills.app_control import _smart_search_with_context, _auto_add_app_to_config
+                        from assistant.skills.app_control import (
+                            _auto_add_app_to_config,
+                            _smart_search_with_context,
+                        )
                         found = _smart_search_with_context(app_name, context)
                         if found:
                             print(f"✅ Найдено: {found}", flush=True)

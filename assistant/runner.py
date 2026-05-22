@@ -1,11 +1,12 @@
 from __future__ import annotations
+
 import logging
 import re
 import time
 from typing import Optional
 
-from .skills import SKILLS
 from .core.exceptions import SkillError
+from .skills import SKILLS
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +82,7 @@ def run_command(cmd: dict) -> None:
     intent: str = cmd["intent"]
     args: dict = cmd.get("args", {})
     speak: Optional[str] = cmd.get("speak")
-    conf: float = float(cmd.get("confidence", 1.0))
+    float(cmd.get("confidence", 1.0))
 
     now = time.time()
     command_key = f"{intent}:{args}"

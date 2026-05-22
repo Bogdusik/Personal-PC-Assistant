@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import json
 import logging
 import os
@@ -7,7 +8,7 @@ from typing import Any
 
 import requests
 
-from .normalizer import _has_too_much_cjk, _extract_json
+from .normalizer import _extract_json, _has_too_much_cjk
 
 logger = logging.getLogger(__name__)
 

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import difflib
 import glob
 import json
@@ -275,8 +276,8 @@ def open_app(alias: str) -> None:
 
 def minimize_app(alias: str) -> None:
     try:
-        import win32gui
         import win32con
+        import win32gui
     except ImportError as exc:
         raise SkillError("pywin32 не установлен") from exc
 

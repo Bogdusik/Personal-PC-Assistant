@@ -1,10 +1,17 @@
 """Tests that skills raise SkillError on failure."""
 from __future__ import annotations
-from unittest.mock import patch, MagicMock
+
+from unittest.mock import patch
 
 import pytest
 
-from assistant.core.exceptions import AssistantError, OllamaError, ConfigError, SkillError, AudioError
+from assistant.core.exceptions import (
+    AssistantError,
+    AudioError,
+    ConfigError,
+    OllamaError,
+    SkillError,
+)
 
 
 class TestExceptionHierarchy:
@@ -34,7 +41,7 @@ class TestExceptionHierarchy:
 
 class TestCloseAppProtectedProcesses:
     def test_close_lsass_raises_skill_error(self):
-        from assistant.skills.app_control import close_app, PROTECTED_PROCESSES
+        from assistant.skills.app_control import PROTECTED_PROCESSES, close_app
         assert "lsass.exe" in PROTECTED_PROCESSES
         with pytest.raises(SkillError, match="защищённый"):
             close_app("lsass")
