@@ -1,6 +1,6 @@
 try:
-    from .registry import SKILLS
     from .app_control import APP_ALIASES
+    from .registry import SKILLS
 except ImportError:
     SKILLS = {}
     APP_ALIASES = {}

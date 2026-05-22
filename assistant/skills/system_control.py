@@ -1,13 +1,13 @@
 from __future__ import annotations
+
 import datetime
 import logging
-import os
 import subprocess
+from ctypes import POINTER, cast
 
-from ctypes import cast, POINTER
+import mss
 from comtypes import CLSCTX_ALL
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
-import mss
 
 from assistant.core.exceptions import SkillError
 

@@ -1,12 +1,13 @@
 from __future__ import annotations
+
 import logging
 import time
 from typing import Optional
 
+import keyboard
 import numpy as np
 import sounddevice as sd
 import soundfile as sf
-import keyboard
 
 from assistant.core.exceptions import AudioError
 

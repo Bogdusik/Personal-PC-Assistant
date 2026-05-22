@@ -1,5 +1,6 @@
 """Tests for NLU rules engine — no Ollama or Windows APIs needed."""
 from __future__ import annotations
+
 from unittest.mock import patch
 
 import pytest

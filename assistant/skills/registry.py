@@ -1,12 +1,19 @@
 from __future__ import annotations
+
 from typing import Callable, Protocol, runtime_checkable
 
-from .app_control import open_app, minimize_app, close_app
+from .app_control import close_app, minimize_app, open_app
 from .browser import open_browser_search, open_website
-from .clipboard import clipboard_copy, clipboard_paste, confirm_action, cancel_action
+from .clipboard import cancel_action, clipboard_copy, clipboard_paste, confirm_action
 from .system_control import (
-    system_volume, screenshot, system_shutdown, system_restart,
-    system_sleep, system_lock, wifi_toggle, brightness_set,
+    brightness_set,
+    screenshot,
+    system_lock,
+    system_restart,
+    system_shutdown,
+    system_sleep,
+    system_volume,
+    wifi_toggle,
 )
 
 

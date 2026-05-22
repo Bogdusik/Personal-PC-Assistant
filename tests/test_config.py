@@ -1,5 +1,6 @@
 """Tests for config loading and custom command validation."""
 from __future__ import annotations
+
 import json
 import re
 import tempfile
@@ -52,8 +53,9 @@ class TestCustomCommandRegex:
         assert compiled is not None
 
     def test_catastrophic_regex_is_caught(self):
-        from assistant.nlu.engine import _custom_rules
         from unittest.mock import patch
+
+        from assistant.nlu.engine import _custom_rules
         bad_rule = [{"match_type": "regex", "pattern": "(a+)+b", "intent": "open_app", "args": {"alias": "chrome"}, "speak": None}]
         with patch("assistant.nlu.engine.load_config_cached", return_value={"custom_commands": bad_rule}):
             result = _custom_rules("a" * 30 + "c")

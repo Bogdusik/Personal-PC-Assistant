@@ -21,29 +21,28 @@ from pathlib import Path
 
 import requests
 from PyQt6.QtCore import (
-    Qt,
-    QTimer,
-    QPropertyAnimation,
     QEasingCurve,
     QPointF,
+    QPropertyAnimation,
     QRectF,
+    Qt,
+    QTimer,
 )
 from PyQt6.QtGui import (
+    QBrush,
     QColor,
     QFont,
-    QPainter,
-    QPen,
-    QBrush,
-    QLinearGradient,
-    QRadialGradient,
     QImage,
+    QLinearGradient,
+    QPainter,
     QPainterPath,
+    QPen,
+    QRadialGradient,
 )
 from PyQt6.QtWidgets import (
     QApplication,
     QDialog,
-    QGridLayout,
-    QGroupBox,
+    QGraphicsDropShadowEffect,
     QHBoxLayout,
     QLabel,
     QLineEdit,
@@ -54,9 +53,7 @@ from PyQt6.QtWidgets import (
     QTextEdit,
     QVBoxLayout,
     QWidget,
-    QGraphicsDropShadowEffect,
 )
-
 
 ROOT_DIR = Path(__file__).resolve().parent
 CONFIG_PATH = ROOT_DIR / "config.json"
@@ -111,31 +108,31 @@ def save_config(cfg: dict) -> None:
 
 class AnimatedBackground(QWidget):
     """Виджет с анимированным фоном: градиент + noise + scanlines."""
-    
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.noise_offset = 0
         self.scanline_offset = 0
-        
+
         # Таймер для анимации noise и scanlines
         self.timer = QTimer(self)
         self.timer.timeout.connect(self._update_animation)
         self.timer.setSingleShot(False)
         self.timer.start(50)
-        
+
         # Генерируем noise texture
         self.noise_image = self._generate_noise()
-        
+
         # Устанавливаем, чтобы виджет занимал весь размер родителя
         if parent:
             self.setGeometry(0, 0, parent.width(), parent.height())
-    
+
     def resizeEvent(self, event):
         """Обновляем размер при изменении размера родителя."""
         if self.parent():
             self.setGeometry(0, 0, self.parent().width(), self.parent().height())
         super().resizeEvent(event)
-        
+
     def _generate_noise(self) -> QImage:
         """Генерирует текстуру шума."""
         img = QImage(200, 200, QImage.Format.Format_ARGB32)
@@ -144,7 +141,7 @@ class AnimatedBackground(QWidget):
                 noise = random.randint(0, 30)
                 img.setPixel(x, y, QColor(noise, noise, noise, 5).rgba())
         return img
-    
+
     def _update_animation(self):
         try:
             self.noise_offset += 2
@@ -161,14 +158,14 @@ class AnimatedBackground(QWidget):
         except Exception:
             # Игнорируем другие ошибки в анимации
             pass
-    
+
     def paintEvent(self, event):
         if self.width() <= 0 or self.height() <= 0:
             return
-            
+
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
+
         # Радиальный градиент (от черного в центре к темно-синему по краям)
         gradient = QRadialGradient(
             self.width() / 2, self.height() / 2,
@@ -177,7 +174,7 @@ class AnimatedBackground(QWidget):
         gradient.setColorAt(0, BLACK)
         gradient.setColorAt(1, DARK_GRAY)
         painter.fillRect(QRectF(self.rect()), QBrush(gradient))
-        
+
         # Noise overlay (очень прозрачный)
         if self.noise_image:
             for x in range(0, self.width(), 200):
@@ -187,7 +184,7 @@ class AnimatedBackground(QWidget):
                         y + (self.noise_offset % 200),
                         self.noise_image
                     )
-        
+
         # Scanline effect (очень тонкий)
         painter.setPen(QPen(NEON_ORANGE, 1))
         for y in range(self.scanline_offset, self.height(), 4):
@@ -196,7 +193,7 @@ class AnimatedBackground(QWidget):
 
 class PremiumWaveformWidget(QWidget):
     """Улучшенный waveform с градиентом и glow эффектом."""
-    
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setMinimumHeight(80)
@@ -206,7 +203,7 @@ class PremiumWaveformWidget(QWidget):
         self.timer.timeout.connect(self._update_waveform)
         self.timer.setSingleShot(False)
         self.timer.start(50)
-        
+
     def _update_waveform(self):
         try:
             if len(self.data_points) > 150:
@@ -229,47 +226,47 @@ class PremiumWaveformWidget(QWidget):
         except Exception:
             # Игнорируем другие ошибки в анимации
             pass
-    
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
+
         # Фон
         if self.width() > 0 and self.height() > 0:
             painter.fillRect(QRectF(self.rect()), QColor(0, 0, 0, 180))
         else:
             return
-        
+
         if len(self.data_points) < 2:
             return
-        
+
         width = self.width()
         height = self.height()
         if width <= 0 or height <= 0:
             return
         step = width / max(len(self.data_points), 1)
-        
+
         # Рисуем с градиентом и glow
         for i in range(len(self.data_points) - 1):
             x1 = i * step
             y1 = height - (self.data_points[i] / 100.0 * height)
             x2 = (i + 1) * step
             y2 = height - (self.data_points[i + 1] / 100.0 * height)
-            
+
             # Градиент от яркого оранжевого к прозрачному
             gradient = QLinearGradient(x1, 0, x1, height)
             gradient.setColorAt(0, NEON_ORANGE_BRIGHT)
             gradient.setColorAt(0.5, NEON_ORANGE)
             gradient.setColorAt(1, QColor(255, 102, 0, 0))
-            
+
             # Толстая линия с glow
             pen = QPen(QBrush(gradient), 3)
             pen.setCapStyle(Qt.PenCapStyle.RoundCap)
             painter.setPen(pen)
-            
+
             # Основная линия
             painter.drawLine(QPointF(x1, y1), QPointF(x2, y2))
-            
+
             # Glow эффект (более тонкая линия с размытием)
             glow_pen = QPen(NEON_ORANGE, 1)
             painter.setPen(glow_pen)
@@ -284,7 +281,7 @@ class PremiumWaveformWidget(QWidget):
 
 class GlassmorphismPanel(QWidget):
     """Панель с glassmorphism эффектом и пульсирующей рамкой."""
-    
+
     def __init__(self, title="", parent=None):
         super().__init__(parent)
         self.title = title
@@ -293,7 +290,7 @@ class GlassmorphismPanel(QWidget):
         self.pulse_timer.timeout.connect(self._pulse_border)
         self.pulse_timer.start(3000)  # Пульсация каждые 3 секунды
         self.pulse_direction = 1
-        
+
     def _pulse_border(self):
         self.border_opacity += 0.1 * self.pulse_direction
         if self.border_opacity >= 0.6:
@@ -301,15 +298,15 @@ class GlassmorphismPanel(QWidget):
         elif self.border_opacity <= 0.3:
             self.pulse_direction = 1
         self.update()
-    
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
+
         # Полупрозрачный фон с blur эффектом (симулируем через градиент)
         bg_color = QColor(10, 10, 10, 100)
         painter.fillRect(self.rect(), bg_color)
-        
+
         # Пульсирующая рамка
         border_color = QColor(
             int(255 * self.border_opacity),
@@ -320,7 +317,7 @@ class GlassmorphismPanel(QWidget):
         pen = QPen(border_color, 1)
         painter.setPen(pen)
         painter.drawRoundedRect(1, 1, self.width() - 2, self.height() - 2, 8, 8)
-        
+
         # Заголовок
         if self.title:
             font = QFont("Courier", 11, QFont.Weight.Bold)
@@ -331,54 +328,54 @@ class GlassmorphismPanel(QWidget):
 
 class NeonButton(QPushButton):
     """Кнопка с neon эффектом и анимацией."""
-    
+
     def __init__(self, text="", parent=None, primary=False):
         super().__init__(text, parent)
         self.primary = primary
         self.hover_glow = 0.0
-        
+
         # Glow эффект
         self.shadow = QGraphicsDropShadowEffect(self)
         self.shadow.setBlurRadius(15)
         self.shadow.setColor(NEON_ORANGE)
         self.shadow.setOffset(0, 0)
         self.setGraphicsEffect(self.shadow)
-        
+
         self.setCursor(Qt.CursorShape.PointingHandCursor)
-        
+
     def enterEvent(self, event):
         super().enterEvent(event)
         self.hover_glow = 1.0
         self.shadow.setBlurRadius(25)
         self.update()
-        
+
     def leaveEvent(self, event):
         super().leaveEvent(event)
         self.hover_glow = 0.0
         self.shadow.setBlurRadius(15)
         self.update()
-    
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-        
+
         # Фон кнопки
         if self.primary:
             bg_color = QColor(255, 102, 0, int(50 + self.hover_glow * 30))
         else:
             bg_color = QColor(255, 102, 0, int(30 + self.hover_glow * 20))
-        
+
         # Используем QPainterPath для скругленного прямоугольника
         path = QPainterPath()
         path.addRoundedRect(QRectF(self.rect()), 6, 6)
         painter.fillPath(path, bg_color)
-        
+
         # Рамка
         border_color = NEON_ORANGE if self.primary else QColor(255, 102, 0, int(128 + self.hover_glow * 127))
         pen = QPen(border_color, 2)
         painter.setPen(pen)
         painter.drawRoundedRect(1, 1, self.width() - 2, self.height() - 2, 6, 6)
-        
+
         # Текст
         font = QFont("Courier", 10, QFont.Weight.Bold)
         painter.setFont(font)
@@ -389,17 +386,17 @@ class NeonButton(QPushButton):
 
 class SystemCheckDialog(QDialog):
     """Диалог проверки системы в стиле cyberpunk."""
-    
+
     def __init__(self, parent=None, admin_msg="", hotkey="", mic_info="", aliases_summary=""):
         super().__init__(parent)
         self.setWindowTitle("SYSTEM DIAGNOSTICS")
         self.setMinimumSize(600, 500)
         self.setModal(True)
-        
+
         layout = QVBoxLayout(self)
         layout.setContentsMargins(20, 20, 20, 20)
         layout.setSpacing(16)
-        
+
         # Заголовок с glow
         title = QLabel("SYSTEM DIAGNOSTICS")
         title.setStyleSheet("""
@@ -414,7 +411,7 @@ class SystemCheckDialog(QDialog):
         shadow.setColor(NEON_ORANGE)
         title.setGraphicsEffect(shadow)
         layout.addWidget(title)
-        
+
         # Контент
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
@@ -424,24 +421,24 @@ class SystemCheckDialog(QDialog):
                 background: rgba(0, 0, 0, 0.5);
             }
         """)
-        
+
         content_widget = QWidget()
         content_layout = QVBoxLayout(content_widget)
         content_layout.setSpacing(12)
-        
+
         self._add_info_block(content_layout, "ADMIN RIGHTS", admin_msg)
         self._add_info_block(content_layout, "HOTKEY", hotkey)
         self._add_info_block(content_layout, "MICROPHONE", mic_info)
         self._add_info_block(content_layout, "APPLICATIONS", aliases_summary)
-        
+
         scroll.setWidget(content_widget)
         layout.addWidget(scroll)
-        
+
         # Кнопка закрытия
         btn_close = NeonButton("CLOSE", self, primary=True)
         btn_close.clicked.connect(self.accept)
         layout.addWidget(btn_close)
-    
+
     def _add_info_block(self, layout, title, content):
         """Добавляет блок информации."""
         block = QWidget()
@@ -453,10 +450,10 @@ class SystemCheckDialog(QDialog):
                 padding: 12px;
             }
         """)
-        
+
         block_layout = QVBoxLayout(block)
         block_layout.setSpacing(8)
-        
+
         title_label = QLabel(title)
         title_label.setStyleSheet("""
             font-size: 12px;
@@ -466,7 +463,7 @@ class SystemCheckDialog(QDialog):
             letter-spacing: 1px;
         """)
         block_layout.addWidget(title_label)
-        
+
         content_label = QLabel(content)
         content_label.setWordWrap(True)
         content_label.setStyleSheet("""
@@ -475,7 +472,7 @@ class SystemCheckDialog(QDialog):
             font-family: "Courier", monospace;
         """)
         block_layout.addWidget(content_label)
-        
+
         layout.addWidget(block)
 
 
@@ -484,11 +481,11 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("PERSONAL PC ASSISTANT - CONTROL PANEL")
         self.setMinimumSize(1000, 700)
-        
+
         # Анимация появления
         self.opacity = 0.0
-        self.startup_animations = []
-        
+        self.startup_animations: list[QPropertyAnimation] = []
+
         self.hotkey_edit = QLineEdit()
         self.mic_edit = QLineEdit()
         self.model_edit = QLineEdit()
@@ -515,7 +512,7 @@ class MainWindow(QMainWindow):
         """)
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(20, 0, 20, 0)
-        
+
         title_left = QLabel("OBJECT IDENTIFICATION .. 01")
         title_left.setStyleSheet("""
             color: #ff6600;
@@ -524,7 +521,7 @@ class MainWindow(QMainWindow):
             font-weight: 700;
             letter-spacing: 1px;
         """)
-        
+
         title_center = QLabel("PERSONAL PC ASSISTANT")
         title_center.setStyleSheet("""
             color: #FFFFFF;
@@ -539,7 +536,7 @@ class MainWindow(QMainWindow):
         title_shadow.setColor(NEON_ORANGE)
         title_center.setGraphicsEffect(title_shadow)
         title_center.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        
+
         title_right = QLabel("STAT: READY")
         title_right.setStyleSheet("""
             color: #00ff00;
@@ -548,11 +545,11 @@ class MainWindow(QMainWindow):
             font-weight: 700;
             letter-spacing: 1px;
         """)
-        
+
         header_layout.addWidget(title_left)
         header_layout.addWidget(title_center, stretch=1)
         header_layout.addWidget(title_right)
-        
+
         root_layout.addWidget(header)
 
         # Основной контент - три колонки
@@ -679,7 +676,7 @@ class MainWindow(QMainWindow):
         wave_label = QLabel("AUDIO MONITOR")
         wave_label.setStyleSheet("color: #ff6600; font-family: 'Courier', monospace; font-size: 11px; font-weight: 700;")
         center_layout.addWidget(wave_label)
-        
+
         waveform = PremiumWaveformWidget()
         center_layout.addWidget(waveform)
 
@@ -760,12 +757,12 @@ class MainWindow(QMainWindow):
             info_layout = QVBoxLayout(info_widget)
             info_layout.setContentsMargins(0, 0, 0, 0)
             info_layout.setSpacing(2)
-            
+
             info_label = QLabel(label)
             info_label.setStyleSheet("color: #ff6600; font-family: 'Courier', monospace; font-size: 9px; font-weight: 700;")
             info_value = QLabel(value)
             info_value.setStyleSheet("color: #FFFFFF; font-family: 'Courier', monospace; font-size: 11px; font-weight: 700;")
-            
+
             info_layout.addWidget(info_label)
             info_layout.addWidget(info_value)
             footer_layout.addWidget(info_widget)
@@ -785,14 +782,14 @@ class MainWindow(QMainWindow):
         # Fade-in для всего окна (запускаем после показа окна)
         # Пока устанавливаем нормальную opacity, чтобы окно было видно
         self.setWindowOpacity(1.0)
-        
+
         # Анимацию запустим после show() в main()
         self.fade_anim = QPropertyAnimation(self, b"windowOpacity")
         self.fade_anim.setDuration(800)
         self.fade_anim.setStartValue(0.0)
         self.fade_anim.setEndValue(1.0)
         self.fade_anim.setEasingCurve(QEasingCurve.Type.OutCubic)
-    
+
     def closeEvent(self, event):
         """Корректно закрываем приложение, останавливая все таймеры."""
         try:
@@ -800,13 +797,13 @@ class MainWindow(QMainWindow):
             for widget in self.findChildren(QWidget):
                 if hasattr(widget, 'timer') and widget.timer.isActive():
                     widget.timer.stop()
-            
+
             # Останавливаем fade-in анимацию, если она запущена
             if hasattr(self, 'fade_anim') and self.fade_anim.state() == QPropertyAnimation.State.Running:
                 self.fade_anim.stop()
         except Exception:
             pass
-        
+
         event.accept()
 
     def _load_into_form(self) -> None:
@@ -997,13 +994,13 @@ class MainWindow(QMainWindow):
 def main() -> None:
     # Подавляем вывод KeyboardInterrupt при нормальном закрытии
     import signal
-    
+
     def signal_handler(sig, frame):
         # При Ctrl+C просто выходим без traceback
         sys.exit(0)
-    
+
     signal.signal(signal.SIGINT, signal_handler)
-    
+
     app = QApplication(sys.argv)
 
     # Premium Sci-Fi / Cyberpunk тема
@@ -1012,7 +1009,7 @@ def main() -> None:
         QMainWindow {
             background: #000000;
         }
-        
+
         QWidget {
             background: transparent;
             color: #FFFFFF;
@@ -1023,12 +1020,12 @@ def main() -> None:
             background: #000000;
             color: #FFFFFF;
         }
-        
+
         QMessageBox QLabel {
             color: #FFFFFF;
             font-family: "Courier", monospace;
         }
-        
+
         QMessageBox QPushButton {
             background: rgba(255, 102, 0, 0.2);
             color: #ff6600;
@@ -1038,7 +1035,7 @@ def main() -> None:
             font-family: "Courier", monospace;
             font-weight: 700;
         }
-        
+
         QMessageBox QPushButton:hover {
             background: rgba(255, 102, 0, 0.3);
         }
@@ -1050,20 +1047,20 @@ def main() -> None:
             background: #000000;
         }
     """)
-    
+
     # Устанавливаем начальную opacity для fade-in анимации
     window.setWindowOpacity(0.0)
-    
+
     # Убеждаемся, что окно не минимизировано
     window.setWindowState(Qt.WindowState.WindowNoState)
-    
+
     # Показываем окно
     window.show()
-    
+
     # Активируем и поднимаем на передний план
     window.raise_()
     window.activateWindow()
-    
+
     # Для Windows: принудительно фокусируем окно
     if sys.platform == "win32":
         window.showNormal()
@@ -1075,11 +1072,11 @@ def main() -> None:
             ctypes.windll.user32.SetForegroundWindow(int(window.winId()))
         except Exception:
             pass
-    
+
     # Запускаем fade-in анимацию после показа окна
     if hasattr(window, 'fade_anim'):
         window.fade_anim.start()
-    
+
     sys.exit(app.exec())
 
 
