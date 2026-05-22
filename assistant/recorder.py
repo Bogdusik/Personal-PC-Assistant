@@ -1,39 +1,58 @@
-import time, numpy as np, sounddevice as sd, soundfile as sf, keyboard
+from __future__ import annotations
+import logging
+import time
+from typing import Optional
+
+import numpy as np
+import sounddevice as sd
+import soundfile as sf
+import keyboard
+
+from assistant.core.exceptions import AudioError
+
+logger = logging.getLogger(__name__)
 
 SAMPLE_RATE = 16000
 CHANNELS = 1
 
-def record_push_to_talk(outfile: str, hotkey: str = "right shift", mic_device=None) -> str | None:
+
+def record_push_to_talk(
+    outfile: str,
+    hotkey: str = "right shift",
+    mic_device: Optional[int | str] = None,
+) -> Optional[str]:
     try:
         while not keyboard.is_pressed(hotkey):
             time.sleep(0.01)
-    except RuntimeError:
-        print('Нужны права администратора. Запустите "От имени администратора".')
-        return None
+    except RuntimeError as exc:
+        raise AudioError('Нужны права администратора для hotkey-хука') from exc
 
-    frames = []
+    frames: list[np.ndarray] = []
     try:
-        with sd.InputStream(samplerate=SAMPLE_RATE, channels=CHANNELS, dtype='int16', device=mic_device) as stream:
+        with sd.InputStream(
+            samplerate=SAMPLE_RATE,
+            channels=CHANNELS,
+            dtype="int16",
+            device=mic_device,
+        ) as stream:
             while keyboard.is_pressed(hotkey):
                 data, _ = stream.read(1024)
                 frames.append(data.copy())
-            
             for _ in range(int(SAMPLE_RATE * 0.1 / 1024) + 1):
                 data, _ = stream.read(1024)
                 frames.append(data.copy())
-    except Exception as e:
-        print(f"Ошибка записи: {e}")
-        return None
+    except sd.PortAudioError as exc:
+        raise AudioError(f"Ошибка записи с микрофона: {exc}") from exc
 
     if not frames:
         return None
 
     audio = np.concatenate(frames, axis=0)
     dur = len(audio) / SAMPLE_RATE
-    
+
     if dur < 0.5:
         return None
-    
+
     sf.write(outfile, audio, SAMPLE_RATE)
-    print(f"Записано: {dur:.1f}с")
+    logger.info("Записано: %.1fс → %s", dur, outfile)
     return outfile
