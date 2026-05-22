@@ -1,0 +1,26 @@
+name: Lint & Type Check
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install lint tools
+        run: pip install ruff mypy
+
+      - name: Ruff (lint + format check)
+        run: ruff check . --select E,F,W,I --ignore E501
+
+      - name: Mypy (type check)
+        run: mypy assistant --ignore-missing-imports --no-strict-optional
