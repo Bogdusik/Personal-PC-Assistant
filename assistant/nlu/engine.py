@@ -7,6 +7,8 @@ import re
 from pathlib import Path
 from typing import Any
 
+import regex
+
 from .normalizer import _clean, _lemmatize_line, _normalize_app_name, _wrap
 from .ollama_client import OllamaClient
 
@@ -55,6 +57,8 @@ PROMPT_SYSTEM = """Ты — локальный голосовой ассисте
 {"intent":"wifi_toggle","args":{},"speak":"Переключаю Wi-Fi."}
 {"intent":"clipboard_copy","args":{"text":"Привет мир"},"speak":"Копирую в буфер."}
 """
+
+_REGEX_TIMEOUT_SEC = 0.5
 
 _CFG_MTIME: float = 0.0
 _CFG_CACHE: dict = {}
@@ -177,10 +181,13 @@ def _custom_rules(phrase: str) -> dict | None:
                 matched = _clean(patt) in text_norm
             elif mtype == "regex":
                 try:
-                    compiled = re.compile(patt, re.IGNORECASE)
-                    matched = bool(compiled.search(text_orig))
-                except re.error as exc:
+                    compiled = regex.compile(patt, regex.IGNORECASE)
+                    matched = bool(compiled.search(text_orig, timeout=_REGEX_TIMEOUT_SEC))
+                except regex.error as exc:
                     logger.warning("Неверный regex-паттерн '%s': %s", patt, exc)
+                    matched = False
+                except TimeoutError:
+                    logger.warning("Regex-паттерн '%s' слишком медленный, пропускаю", patt)
                     matched = False
 
             if matched:
@@ -230,6 +237,10 @@ def _rules_nlu(phrase: str) -> dict:
             return _wrap({"intent": "open_browser_search", "args": {"query": query}, "speak": "Открываю поиск."}, 0.9, orig)
 
     lem = _lemmatize_line(orig)
+    cleaned = _clean(orig)
+
+    def says(pattern: str) -> bool:
+        return bool(re.search(pattern, lem) or re.search(pattern, cleaned))
 
     m2 = re.search(r"открыть .* браузер .* (?:и|и там)\s+(.+)", lem)
     if m2:
@@ -248,6 +259,33 @@ def _rules_nlu(phrase: str) -> dict:
                     "args": {"app_name": app_name, "context": context},
                     "speak": f"Ищу {app_name}...",
                 }, 0.9, orig)
+
+    if says(r"\b(выключить\s+компьютер|выключить\s+систему|завершить\s+работу|выключить\s+пк|выключить\s+комп)\b"):
+        return _wrap({"intent": "system_shutdown", "args": {}, "speak": "Выключаю систему."}, 0.9, orig)
+
+    if says(r"\b(перезагрузить\s+компьютер|перезагрузить\s+систему|рестарт)\b"):
+        return _wrap({"intent": "system_restart", "args": {}, "speak": "Перезагружаю систему."}, 0.9, orig)
+
+    if says(r"\b(заблокировать\s+компьютер|заблокировать\s+систему|блокировка)\b"):
+        return _wrap({"intent": "system_lock", "args": {}, "speak": "Блокирую систему."}, 0.9, orig)
+
+    if says(r"\b(включить\s+вайфай|выключить\s+вайфай|переключить\s+вайфай)\b"):
+        return _wrap({"intent": "wifi_toggle", "args": {}, "speak": "Переключаю Wi-Fi."}, 0.9, orig)
+
+    if says(r"\b(статус|статус системы|покажи статус|информация о системе)\b"):
+        return _wrap({"intent": "system_status", "args": {}, "speak": "Показываю статус."}, 0.9, orig)
+
+    if says(r"\b(покажи команды|список команд|мои команды|команды)\b"):
+        return _wrap({"intent": "list_commands", "args": {}, "speak": "Список команд."}, 0.9, orig)
+
+    if says(r"\b(удали команду|удалить команду|удалить)\b"):
+        return _wrap({"intent": "delete_command", "args": {}, "speak": "Удаляю команду."}, 0.9, orig)
+
+    if says(r"\b(обучи команду|создай команду|новая команда|добавь команду)\b"):
+        return _wrap({"intent": "teach_command", "args": {}, "speak": "Создаю команду."}, 0.9, orig)
+
+    if says(r"\b(вставить\s+из\s+буфера|показать\s+буфер)\b"):
+        return _wrap({"intent": "clipboard_paste", "args": {}, "speak": "Содержимое буфера."}, 0.9, orig)
 
     m5 = re.search(r"\b(свернуть|минимизировать|убрать\s+в\s+трей|спрятать|скрой|сокрой)\s+(.+)", lem)
     if m5:
@@ -278,23 +316,11 @@ def _rules_nlu(phrase: str) -> dict:
         level = int(m4o.group(1)) if m4o else int(m4.group(2))
         return _wrap({"intent": "system_volume", "args": {"level": max(0, min(100, level))}, "speak": f"Громкость {level}%."}, 0.9, orig)
 
-    if re.search(r"\b(сделать\s+скриншот|сделать\s+скрин)\b", lem):
+    if says(r"\b(сделать\s+скриншот|сделать\s+скрин)\b"):
         return _wrap({"intent": "screenshot", "args": {}, "speak": "Скриншот готов."}, 0.9, orig)
 
-    if re.search(r"\b(выключить\s+компьютер|выключить\s+систему|завершить\s+работу|выключить\s+пк|выключить\s+комп)\b", lem):
-        return _wrap({"intent": "system_shutdown", "args": {}, "speak": "Выключаю систему."}, 0.9, orig)
-
-    if re.search(r"\b(перезагрузить\s+компьютер|перезагрузить\s+систему|рестарт)\b", lem):
-        return _wrap({"intent": "system_restart", "args": {}, "speak": "Перезагружаю систему."}, 0.9, orig)
-
-    if re.search(r"\b(уснуть|спать|режим\s+сна|сон)\b", lem):
+    if says(r"\b(уснуть|спать|режим\s+сна|сон)\b"):
         return _wrap({"intent": "system_sleep", "args": {}, "speak": "Перевожу в режим сна."}, 0.9, orig)
-
-    if re.search(r"\b(заблокировать\s+компьютер|заблокировать\s+систему|блокировка)\b", lem):
-        return _wrap({"intent": "system_lock", "args": {}, "speak": "Блокирую систему."}, 0.9, orig)
-
-    if re.search(r"\b(включить\s+вайфай|выключить\s+вайфай|переключить\s+вайфай)\b", lem):
-        return _wrap({"intent": "wifi_toggle", "args": {}, "speak": "Переключаю Wi-Fi."}, 0.9, orig)
 
     m7 = re.search(r"\b(яркость|освещение)\s+(\d{1,3})\b", lem)
     if m7:
@@ -306,26 +332,11 @@ def _rules_nlu(phrase: str) -> dict:
         if text:
             return _wrap({"intent": "clipboard_copy", "args": {"text": text}, "speak": "Копирую в буфер."}, 0.9, orig)
 
-    if re.search(r"\b(вставить\s+из\s+буфера|показать\s+буфер)\b", lem):
-        return _wrap({"intent": "clipboard_paste", "args": {}, "speak": "Содержимое буфера."}, 0.9, orig)
-
     if re.search(r"\b(да|подтверждаю|согласен|выполняй|делай|ок|хорошо|подтвердить)\b", lem):
         return _wrap({"intent": "confirm_action", "args": {}, "speak": "Подтверждаю."}, 0.9, orig)
 
     if re.search(r"\b(нет|отмена|отменить|не надо|не нужно|стоп|останови|откажись)\b", lem):
         return _wrap({"intent": "cancel_action", "args": {}, "speak": "Отменяю."}, 0.9, orig)
-
-    if re.search(r"\b(статус|статус системы|покажи статус|информация о системе)\b", lem):
-        return _wrap({"intent": "system_status", "args": {}, "speak": "Показываю статус."}, 0.9, orig)
-
-    if re.search(r"\b(покажи команды|список команд|мои команды|команды)\b", lem):
-        return _wrap({"intent": "list_commands", "args": {}, "speak": "Список команд."}, 0.9, orig)
-
-    if re.search(r"\b(удали команду|удалить команду|удалить)\b", lem):
-        return _wrap({"intent": "delete_command", "args": {}, "speak": "Удаляю команду."}, 0.9, orig)
-
-    if re.search(r"\b(обучи команду|создай команду|новая команда|добавь команду)\b", lem):
-        return _wrap({"intent": "teach_command", "args": {}, "speak": "Создаю команду."}, 0.9, orig)
 
     return _wrap(
         {"intent": "smalltalk", "args": {"text": orig}, "speak": "Пока умею: поиск, запуск приложений, громкость, скриншот, управление системой, Wi-Fi, яркость и буфер обмена."},

@@ -91,6 +91,24 @@ class TestSystemCommands:
         result = _nlu("переключить вайфай")
         assert result["intent"] == "wifi_toggle"
 
+    @pytest.mark.parametrize(
+        ("phrase", "intent"),
+        [
+            ("выключить вайфай", "wifi_toggle"),
+            ("включить вайфай", "wifi_toggle"),
+            ("завершить работу", "system_shutdown"),
+            ("выключить систему", "system_shutdown"),
+            ("заблокировать систему", "system_lock"),
+        ],
+    )
+    def test_system_commands_win_over_open_and_close_verbs(self, phrase, intent):
+        assert _nlu(phrase)["intent"] == intent
+
+    def test_closing_an_app_still_works(self):
+        result = _nlu("закрыть хром")
+        assert result["intent"] == "close_app"
+        assert result["args"]["alias"] == "chrome"
+
 
 class TestConfirmCancel:
     def test_confirm(self):
@@ -110,3 +128,27 @@ class TestSmallTalk:
     def test_unknown_phrase_returns_smalltalk(self):
         result = _nlu("какая-то непонятная фраза без смысла xyz")
         assert result["intent"] == "smalltalk"
+
+
+class TestUtilityCommands:
+    @pytest.mark.parametrize(
+        ("phrase", "intent"),
+        [
+            ("покажи команды", "list_commands"),
+            ("список команд", "list_commands"),
+            ("мои команды", "list_commands"),
+            ("удали команду", "delete_command"),
+            ("обучи команду", "teach_command"),
+            ("создай команду", "teach_command"),
+            ("новая команда", "teach_command"),
+            ("информация о системе", "system_status"),
+            ("вставить из буфера", "clipboard_paste"),
+        ],
+    )
+    def test_utility_phrases(self, phrase, intent):
+        assert _nlu(phrase)["intent"] == intent
+
+    def test_copy_to_clipboard_takes_the_spoken_text(self):
+        result = _nlu("скопировать в буфер привет мир")
+        assert result["intent"] == "clipboard_copy"
+        assert result["args"]["text"] == "привет мир"
