@@ -4,11 +4,11 @@ import logging
 import re
 
 try:
-    import pymorphy2
-    _MORPH = pymorphy2.MorphAnalyzer()
+    import pymorphy3
+    _MORPH = pymorphy3.MorphAnalyzer()
 except ImportError:
     _MORPH = None
-    logging.warning("pymorphy2 не установлен — лемматизация отключена")
+    logging.warning("pymorphy3 не установлен — лемматизация отключена")
 
 _TOKEN_RE = re.compile(r"[a-zA-Zа-яА-ЯёЁ0-9]+")
 _CJK_RE = re.compile(r"[㐀-鿿豈-﫿]")

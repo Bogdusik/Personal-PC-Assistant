@@ -1,4 +1,4 @@
-name: Lint & Type Check
+name: CI
 
 on:
   push:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   lint:
+    name: Lint & type check
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,3 +25,23 @@ jobs:
 
       - name: Mypy (type check)
         run: mypy assistant --ignore-missing-imports --no-strict-optional
+
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install test dependencies
+        run: pip install pytest pymorphy3==2.0.6 pymorphy3-dicts-ru regex requests psutil
+
+      - name: Run tests
+        run: pytest tests/ -v

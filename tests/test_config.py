@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import re
 import tempfile
+import time
 from pathlib import Path
 from unittest.mock import patch
 
@@ -57,9 +58,11 @@ class TestCustomCommandRegex:
 
         from assistant.nlu.engine import _custom_rules
         bad_rule = [{"match_type": "regex", "pattern": "(a+)+b", "intent": "open_app", "args": {"alias": "chrome"}, "speak": None}]
+        started = time.monotonic()
         with patch("assistant.nlu.engine.load_config_cached", return_value={"custom_commands": bad_rule}):
             result = _custom_rules("a" * 30 + "c")
-        assert result is None or isinstance(result, dict)
+        assert time.monotonic() - started < 5
+        assert result is None
 
 
 class TestCoerceAndValidate:
